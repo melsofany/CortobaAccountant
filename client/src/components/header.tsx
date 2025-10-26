@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Home, FileText, Receipt, BarChart3 } from "lucide-react";
+import { Home, TrendingDown, TrendingUp, BarChart3 } from "lucide-react";
 import logoUrl from "@assets/unnamed_1761496137747.png";
 
 export default function Header() {
@@ -44,15 +44,26 @@ export default function Header() {
               <span className="hidden sm:inline">الرئيسية</span>
             </Button>
           </Link>
-          <Link href="/payments">
+          <Link href="/expenses">
             <Button
-              variant={isActive("/payments") ? "secondary" : "ghost"}
+              variant={isActive("/expenses") ? "secondary" : "ghost"}
               size="sm"
               className="gap-2"
-              data-testid="link-payments"
+              data-testid="link-expenses"
             >
-              <Receipt className="w-4 h-4" />
-              <span className="hidden sm:inline">الدفعات</span>
+              <TrendingDown className="w-4 h-4" />
+              <span className="hidden sm:inline">المصروفات</span>
+            </Button>
+          </Link>
+          <Link href="/income">
+            <Button
+              variant={isActive("/income") ? "secondary" : "ghost"}
+              size="sm"
+              className="gap-2"
+              data-testid="link-income"
+            >
+              <TrendingUp className="w-4 h-4" />
+              <span className="hidden sm:inline">الوارد</span>
             </Button>
           </Link>
           <Link href="/reports">
