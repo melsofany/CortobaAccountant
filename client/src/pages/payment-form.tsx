@@ -262,11 +262,12 @@ export default function PaymentForm() {
               <div className="space-y-2">
                 <Label htmlFor="paymentType">نوع العملية *</Label>
                 <Select
-                  value={form.watch("paymentType")}
+                  value={form.watch("paymentType") || "expense"}
                   onValueChange={(value: "expense" | "income") => form.setValue("paymentType", value)}
+                  defaultValue="expense"
                 >
                   <SelectTrigger id="paymentType" data-testid="select-payment-type">
-                    <SelectValue placeholder="اختر نوع العملية" />
+                    <SelectValue placeholder="مصروف" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="expense">مصروف</SelectItem>
