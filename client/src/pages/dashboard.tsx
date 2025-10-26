@@ -25,6 +25,19 @@ export default function Dashboard() {
     }).format(amount);
   };
 
+  const getExpenseCategoryName = (category: string | null) => {
+    const categories: Record<string, string> = {
+      supplier: "دفعات للموردين",
+      transport: "نقل",
+      shipping: "شحن",
+      salaries: "مرتبات",
+      rent: "إيجارات",
+      office_supplies: "مستلزمات المكتب",
+      miscellaneous: "مصروفات نثرية",
+    };
+    return category ? categories[category] || category : "غير محدد";
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-6 py-8 max-w-7xl">
@@ -187,6 +200,43 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Expense Categories Summary */}
+        {recentPayments && recentPayments.filter(p => p.paymentType === 'expense' && p.expenseCategory).length > 0 && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-h2">المصروفات حسب النوع</CardTitle>
+              <p className="text-small text-muted-foreground mt-1">ملخص سريع لتوزيع المصروفات</p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {(() => {
+                  const expensesByCategory = recentPayments
+                    .filter(p => p.paymentType === 'expense' && p.expenseCategory)
+                    .reduce((acc, payment) => {
+                      const category = payment.expenseCategory!;
+                      if (!acc[category]) {
+                        acc[category] = 0;
+                      }
+                      acc[category] += Number(payment.totalAmount);
+                      return acc;
+                    }, {} as Record<string, number>);
+
+                  return Object.entries(expensesByCategory).map(([category, total]) => (
+                    <div key={category} className="p-4 border rounded-lg">
+                      <p className="text-tiny text-muted-foreground mb-1">
+                        {getExpenseCategoryName(category)}
+                      </p>
+                      <p className="text-h3 font-bold text-destructive tabular-nums">
+                        {formatCurrency(total)}
+                      </p>
+                    </div>
+                  ));
+                })()}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Recent Payments */}
         <Card>
