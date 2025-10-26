@@ -26,6 +26,19 @@ export default function PrintReceipt() {
     }).format(amount);
   };
 
+  const getExpenseCategoryName = (category: string | null) => {
+    const categories: Record<string, string> = {
+      supplier: "دفعة لمورد",
+      transport: "نقل",
+      shipping: "شحن",
+      salaries: "مرتبات",
+      rent: "إيجارات",
+      office_supplies: "مستلزمات المكتب",
+      miscellaneous: "مصروفات نثرية",
+    };
+    return category ? categories[category] || category : "غير محدد";
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -118,6 +131,14 @@ export default function PrintReceipt() {
                   </p>
                 </div>
               </div>
+
+              {/* Expense Category */}
+              {payment.paymentType === "expense" && payment.expenseCategory && (
+                <div>
+                  <p className="text-small text-muted-foreground mb-1">نوع المصروف</p>
+                  <p className="font-medium">{getExpenseCategoryName(payment.expenseCategory)}</p>
+                </div>
+              )}
 
               {/* Reference Numbers */}
               {(payment.quotationNumber || payment.purchaseOrderNumber) && (
