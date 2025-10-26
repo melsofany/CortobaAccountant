@@ -391,22 +391,25 @@ export default function PaymentForm() {
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="includesVAT" className="flex items-center justify-between">
-                    <span>يشمل ضريبة القيمة المضافة (14%)</span>
-                  </Label>
-                  <div className="flex items-center space-x-2 space-x-reverse h-10 px-3 py-2 bg-muted rounded-lg">
-                    <Switch
-                      id="includesVAT"
-                      checked={form.watch("includesVAT")}
-                      onCheckedChange={(checked) => form.setValue("includesVAT", checked)}
-                      data-testid="switch-includes-vat"
-                    />
-                    <Label htmlFor="includesVAT" className="cursor-pointer">
-                      {form.watch("includesVAT") ? "نعم، يشمل الضريبة" : "لا، بدون ضريبة"}
+                {/* VAT Field - Hidden for salaries and miscellaneous */}
+                {form.watch("expenseCategory") !== "salaries" && form.watch("expenseCategory") !== "miscellaneous" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="includesVAT" className="flex items-center justify-between">
+                      <span>يشمل ضريبة القيمة المضافة (14%)</span>
                     </Label>
+                    <div className="flex items-center space-x-2 space-x-reverse h-10 px-3 py-2 bg-muted rounded-lg">
+                      <Switch
+                        id="includesVAT"
+                        checked={form.watch("includesVAT")}
+                        onCheckedChange={(checked) => form.setValue("includesVAT", checked)}
+                        data-testid="switch-includes-vat"
+                      />
+                      <Label htmlFor="includesVAT" className="cursor-pointer">
+                        {form.watch("includesVAT") ? "نعم، يشمل الضريبة" : "لا، بدون ضريبة"}
+                      </Label>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* VAT Calculation Display */}
