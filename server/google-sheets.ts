@@ -123,6 +123,7 @@ async function getOrCreateSpreadsheet() {
           'Payment Type',
           'Expense Category',
           'Payment Method',
+          'Line Items',
           'Created At',
         ]],
       },
@@ -141,7 +142,7 @@ export async function getAllRows() {
   
   const response = await sheets.spreadsheets.values.get({
     spreadsheetId,
-    range: `${SHEET_NAME}!A2:R`,
+    range: `${SHEET_NAME}!A2:S`,
   });
 
   return response.data.values || [];
@@ -153,7 +154,7 @@ export async function appendRow(values: any[]) {
   
   await sheets.spreadsheets.values.append({
     spreadsheetId,
-    range: `${SHEET_NAME}!A:R`,
+    range: `${SHEET_NAME}!A:S`,
     valueInputOption: 'RAW',
     requestBody: {
       values: [values],
@@ -167,7 +168,7 @@ export async function updateRow(rowIndex: number, values: any[]) {
   
   await sheets.spreadsheets.values.update({
     spreadsheetId,
-    range: `${SHEET_NAME}!A${rowIndex}:R${rowIndex}`,
+    range: `${SHEET_NAME}!A${rowIndex}:S${rowIndex}`,
     valueInputOption: 'RAW',
     requestBody: {
       values: [values],

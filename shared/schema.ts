@@ -22,9 +22,21 @@ export const payments = pgTable("payments", {
   paymentType: text("payment_type").notNull().default("expense"), // expense or income
   expenseCategory: text("expense_category"), // supplier, transport, shipping, salaries, rent, office_supplies, miscellaneous
   paymentMethod: text("payment_method"), // bank_transfer, cash, e_wallet, instapay
+  lineItems: text("line_items"), // JSON string of line items array
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+// Line Item schema for supplier payments
+export const lineItemSchema = z.object({
+  lineNumber: z.string().min(1, "رقم البند مطلوب"),
+  partNumber: z.string().min(1, "رقم القطعة مطلوب"),
+  description: z.string().min(1, "توصيف البند مطلوب"),
+  unit: z.string().min(1, "الوحدة مطلوبة"),
+  quantity: z.string().min(1, "الكمية مطلوبة"),
+});
+
+export type LineItem = z.infer<typeof lineItemSchema>;
 
 export const insertPaymentSchema = createInsertSchema(payments, {
   amount: z.string().min(1, "المبلغ مطلوب"),
@@ -37,6 +49,7 @@ export const insertPaymentSchema = createInsertSchema(payments, {
   paymentType: z.enum(["expense", "income"]).default("expense"),
   expenseCategory: z.enum(["supplier", "transport", "shipping", "salaries", "rent", "office_supplies", "miscellaneous"]).optional(),
   paymentMethod: z.enum(["bank_transfer", "cash", "e_wallet", "instapay"]).optional(),
+  lineItems: z.string().optional(),
 }).omit({
   id: true,
   createdAt: true,

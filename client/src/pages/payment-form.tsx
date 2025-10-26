@@ -24,8 +24,8 @@ import {
 } from "@/components/ui/popover";
 import { ar } from "date-fns/locale";
 import { format } from "date-fns";
-import { CalendarIcon, ArrowRight, Save, CheckCircle2 } from "lucide-react";
-import { insertPaymentSchema, settlementSchema, type InsertPayment, type Payment, type Settlement } from "@shared/schema";
+import { CalendarIcon, ArrowRight, Save, CheckCircle2, Plus, Trash2 } from "lucide-react";
+import { insertPaymentSchema, settlementSchema, lineItemSchema, type InsertPayment, type Payment, type Settlement, type LineItem } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -46,6 +46,14 @@ export default function PaymentForm() {
   const [showSettlement, setShowSettlement] = useState(false);
   const [calculatedVAT, setCalculatedVAT] = useState(0);
   const [calculatedTotal, setCalculatedTotal] = useState(0);
+  const [lineItems, setLineItems] = useState<LineItem[]>([]);
+  const [currentLineItem, setCurrentLineItem] = useState<LineItem>({
+    lineNumber: "",
+    partNumber: "",
+    description: "",
+    unit: "",
+    quantity: "",
+  });
 
   const { data: payment } = useQuery<Payment>({
     queryKey: ["/api/payments", params?.id],
@@ -90,6 +98,15 @@ export default function PaymentForm() {
         paymentMethod: payment.paymentMethod || undefined,
       });
       setIncludesVAT(payment.includesVAT);
+      
+      if (payment.lineItems) {
+        try {
+          const parsedItems = JSON.parse(payment.lineItems);
+          setLineItems(parsedItems);
+        } catch (e) {
+          setLineItems([]);
+        }
+      }
     }
   }, [payment, form]);
 
@@ -113,12 +130,47 @@ export default function PaymentForm() {
     }
   }, [watchAmount, includesVAT]);
 
+  const addLineItem = () => {
+    const result = lineItemSchema.safeParse(currentLineItem);
+    if (!result.success) {
+      toast({
+        title: "خطأ في البيانات",
+        description: "يرجى ملء جميع حقول البند",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setLineItems([...lineItems, currentLineItem]);
+    setCurrentLineItem({
+      lineNumber: "",
+      partNumber: "",
+      description: "",
+      unit: "",
+      quantity: "",
+    });
+    
+    toast({
+      title: "تم الإضافة",
+      description: "تم إضافة البند بنجاح",
+    });
+  };
+
+  const removeLineItem = (index: number) => {
+    setLineItems(lineItems.filter((_, i) => i !== index));
+  };
+
   const saveMutation = useMutation({
     mutationFn: async (data: InsertPayment) => {
+      const dataWithLineItems = {
+        ...data,
+        lineItems: lineItems.length > 0 ? JSON.stringify(lineItems) : undefined,
+      };
+      
       if (isEdit) {
-        return apiRequest("PATCH", `/api/payments/${params.id}`, data);
+        return apiRequest("PATCH", `/api/payments/${params.id}`, dataWithLineItems);
       }
-      return apiRequest("POST", "/api/payments", data);
+      return apiRequest("POST", "/api/payments", dataWithLineItems);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/payments"] });
@@ -418,6 +470,123 @@ export default function PaymentForm() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Line Items Section - Only for supplier expenses */}
+          {form.watch("paymentType") === "expense" && form.watch("expenseCategory") === "supplier" && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-h2">بنود الدفعة</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Add Line Item Form */}
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="lineNumber">رقم البند</Label>
+                    <Input
+                      id="lineNumber"
+                      value={currentLineItem.lineNumber}
+                      onChange={(e) => setCurrentLineItem({ ...currentLineItem, lineNumber: e.target.value })}
+                      placeholder="1"
+                      data-testid="input-line-number"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="partNumber">رقم القطعة</Label>
+                    <Input
+                      id="partNumber"
+                      value={currentLineItem.partNumber}
+                      onChange={(e) => setCurrentLineItem({ ...currentLineItem, partNumber: e.target.value })}
+                      placeholder="PN-123"
+                      data-testid="input-part-number"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="itemDescription">توصيف البند</Label>
+                    <Input
+                      id="itemDescription"
+                      value={currentLineItem.description}
+                      onChange={(e) => setCurrentLineItem({ ...currentLineItem, description: e.target.value })}
+                      placeholder="وصف القطعة"
+                      data-testid="input-item-description"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="unit">الوحدة</Label>
+                    <Input
+                      id="unit"
+                      value={currentLineItem.unit}
+                      onChange={(e) => setCurrentLineItem({ ...currentLineItem, unit: e.target.value })}
+                      placeholder="قطعة"
+                      data-testid="input-unit"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="quantity">الكمية</Label>
+                    <Input
+                      id="quantity"
+                      type="number"
+                      value={currentLineItem.quantity}
+                      onChange={(e) => setCurrentLineItem({ ...currentLineItem, quantity: e.target.value })}
+                      placeholder="1"
+                      data-testid="input-quantity"
+                    />
+                  </div>
+                </div>
+                
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={addLineItem}
+                  className="gap-2"
+                  data-testid="button-add-line-item"
+                >
+                  <Plus className="w-4 h-4" />
+                  إضافة بند
+                </Button>
+
+                {/* Line Items Table */}
+                {lineItems.length > 0 && (
+                  <div className="border rounded-lg overflow-hidden">
+                    <table className="w-full">
+                      <thead className="bg-muted">
+                        <tr>
+                          <th className="px-4 py-3 text-right text-small font-semibold">رقم البند</th>
+                          <th className="px-4 py-3 text-right text-small font-semibold">رقم القطعة</th>
+                          <th className="px-4 py-3 text-right text-small font-semibold">توصيف البند</th>
+                          <th className="px-4 py-3 text-right text-small font-semibold">الوحدة</th>
+                          <th className="px-4 py-3 text-right text-small font-semibold">الكمية</th>
+                          <th className="px-4 py-3 text-center text-small font-semibold">إجراءات</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y">
+                        {lineItems.map((item, index) => (
+                          <tr key={index} data-testid={`line-item-row-${index}`}>
+                            <td className="px-4 py-3 text-small">{item.lineNumber}</td>
+                            <td className="px-4 py-3 text-small">{item.partNumber}</td>
+                            <td className="px-4 py-3 text-small">{item.description}</td>
+                            <td className="px-4 py-3 text-small">{item.unit}</td>
+                            <td className="px-4 py-3 text-small">{item.quantity}</td>
+                            <td className="px-4 py-3 text-center">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeLineItem(index)}
+                                className="text-destructive hover:text-destructive"
+                                data-testid={`button-remove-line-item-${index}`}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Actions */}
           <div className="flex flex-wrap gap-3 justify-end">
