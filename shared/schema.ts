@@ -20,19 +20,21 @@ export const payments = pgTable("payments", {
   settlementDate: timestamp("settlement_date"),
   settlementNotes: text("settlement_notes"),
   paymentType: text("payment_type").notNull().default("expense"), // expense or income
+  expenseCategory: text("expense_category"), // supplier, transport, shipping, salaries, rent, office_supplies, miscellaneous
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const insertPaymentSchema = createInsertSchema(payments, {
   amount: z.string().min(1, "المبلغ مطلوب"),
-  supplierName: z.string().min(1, "اسم المورد مطلوب"),
+  supplierName: z.string().min(1, "اسم المورد/الجهة مطلوب"),
   paymentDate: z.coerce.date(),
   description: z.string().optional(),
   quotationNumber: z.string().optional(),
   purchaseOrderNumber: z.string().optional(),
   includesVAT: z.boolean().default(false),
   paymentType: z.enum(["expense", "income"]).default("expense"),
+  expenseCategory: z.enum(["supplier", "transport", "shipping", "salaries", "rent", "office_supplies", "miscellaneous"]).optional(),
 }).omit({
   id: true,
   createdAt: true,

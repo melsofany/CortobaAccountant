@@ -102,7 +102,7 @@ async function getOrCreateSpreadsheet() {
     // Initialize headers
     await sheets.spreadsheets.values.update({
       spreadsheetId: cachedSpreadsheetId,
-      range: `${SHEET_NAME}!A1:P1`,
+      range: `${SHEET_NAME}!A1:Q1`,
       valueInputOption: 'RAW',
       requestBody: {
         values: [[
@@ -121,6 +121,7 @@ async function getOrCreateSpreadsheet() {
           'Settlement Date',
           'Settlement Notes',
           'Payment Type',
+          'Expense Category',
           'Created At',
         ]],
       },
@@ -139,7 +140,7 @@ export async function getAllRows() {
   
   const response = await sheets.spreadsheets.values.get({
     spreadsheetId,
-    range: `${SHEET_NAME}!A2:P`,
+    range: `${SHEET_NAME}!A2:Q`,
   });
 
   return response.data.values || [];
@@ -151,7 +152,7 @@ export async function appendRow(values: any[]) {
   
   await sheets.spreadsheets.values.append({
     spreadsheetId,
-    range: `${SHEET_NAME}!A:P`,
+    range: `${SHEET_NAME}!A:Q`,
     valueInputOption: 'RAW',
     requestBody: {
       values: [values],
@@ -165,7 +166,7 @@ export async function updateRow(rowIndex: number, values: any[]) {
   
   await sheets.spreadsheets.values.update({
     spreadsheetId,
-    range: `${SHEET_NAME}!A${rowIndex}:P${rowIndex}`,
+    range: `${SHEET_NAME}!A${rowIndex}:Q${rowIndex}`,
     valueInputOption: 'RAW',
     requestBody: {
       values: [values],
