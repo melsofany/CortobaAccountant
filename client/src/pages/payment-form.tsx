@@ -215,17 +215,44 @@ export default function PaymentForm() {
                     <SelectValue placeholder="اختر نوع العملية" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="expense">مصروف (دفعة لمورد)</SelectItem>
+                    <SelectItem value="expense">مصروف</SelectItem>
                     <SelectItem value="income">إضافة للخزينة</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
+              {/* Expense Category - Only for expenses */}
+              {form.watch("paymentType") === "expense" && (
+                <div className="space-y-2">
+                  <Label htmlFor="expenseCategory">نوع المصروف *</Label>
+                  <Select
+                    value={form.watch("expenseCategory") || ""}
+                    onValueChange={(value: any) => form.setValue("expenseCategory", value)}
+                  >
+                    <SelectTrigger id="expenseCategory" data-testid="select-expense-category">
+                      <SelectValue placeholder="اختر نوع المصروف" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="supplier">دفعة لمورد</SelectItem>
+                      <SelectItem value="transport">نقل</SelectItem>
+                      <SelectItem value="shipping">شحن</SelectItem>
+                      <SelectItem value="salaries">مرتبات</SelectItem>
+                      <SelectItem value="rent">إيجارات</SelectItem>
+                      <SelectItem value="office_supplies">مستلزمات المكتب</SelectItem>
+                      <SelectItem value="miscellaneous">مصروفات نثرية</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
               {/* Row 1: Supplier Name and Payment Date */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="supplierName">
-                    {form.watch("paymentType") === "income" ? "اسم الجهة" : "اسم المورد"} *
+                    {form.watch("paymentType") === "income" ? "اسم الجهة" : 
+                     form.watch("expenseCategory") === "supplier" ? "اسم المورد" :
+                     form.watch("expenseCategory") === "salaries" ? "اسم الموظف" :
+                     "اسم الجهة/المورد"} *
                   </Label>
                   <Input
                     id="supplierName"
