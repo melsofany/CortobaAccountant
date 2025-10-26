@@ -42,6 +42,30 @@ export default function ReportsPage() {
     return paymentDate >= startDate && paymentDate <= endDate;
   });
 
+  const getExpenseCategoryName = (category: string | null) => {
+    const categories: Record<string, string> = {
+      supplier: "دفعات للموردين",
+      transport: "نقل",
+      shipping: "شحن",
+      salaries: "مرتبات",
+      rent: "إيجارات",
+      office_supplies: "مستلزمات المكتب",
+      miscellaneous: "مصروفات نثرية",
+    };
+    return category ? categories[category] || category : "غير محدد";
+  };
+
+  const expensesByCategory = filteredPayments?.filter(p => p.paymentType === 'expense').reduce((acc, payment) => {
+    const category = payment.expenseCategory || 'uncategorized';
+    if (!acc[category]) {
+      acc[category] = { count: 0, total: 0, vat: 0 };
+    }
+    acc[category].count++;
+    acc[category].total += Number(payment.totalAmount);
+    acc[category].vat += Number(payment.vatAmount || 0);
+    return acc;
+  }, {} as Record<string, { count: number; total: number; vat: number }>);
+
   const handlePrint = () => {
     window.print();
   };
@@ -190,6 +214,48 @@ export default function ReportsPage() {
             </CardContent>
           </Card>
 
+          {/* Expenses by Category */}
+          {expensesByCategory && Object.keys(expensesByCategory).length > 0 && (
+            <Card className="mb-6 print:shadow-none">
+              <CardHeader>
+                <CardTitle className="text-h2">المصروفات حسب النوع</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-small">
+                    <thead>
+                      <tr className="border-b-2 text-right">
+                        <th className="pb-3 pr-2 font-semibold">نوع المصروف</th>
+                        <th className="pb-3 pr-2 font-semibold">عدد الدفعات</th>
+                        <th className="pb-3 pr-2 font-semibold">الإجمالي</th>
+                        <th className="pb-3 pr-2 font-semibold">الضريبة</th>
+                        <th className="pb-3 pr-2 font-semibold">النسبة</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Object.entries(expensesByCategory).map(([category, data]) => {
+                        const percentage = stats?.totalExpenses ? (data.total / stats.totalExpenses * 100) : 0;
+                        return (
+                          <tr key={category} className="border-b">
+                            <td className="py-3 pr-2 font-medium">{getExpenseCategoryName(category)}</td>
+                            <td className="py-3 pr-2 tabular-nums">{data.count}</td>
+                            <td className="py-3 pr-2 font-bold tabular-nums text-destructive">
+                              {formatCurrency(data.total)}
+                            </td>
+                            <td className="py-3 pr-2 tabular-nums">
+                              {formatCurrency(data.vat)}
+                            </td>
+                            <td className="py-3 pr-2 tabular-nums">{percentage.toFixed(1)}%</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Detailed Payments Table */}
           <Card className="print:shadow-none">
             <CardHeader>
@@ -210,9 +276,9 @@ export default function ReportsPage() {
                       <tr className="border-b-2 text-right">
                         <th className="pb-3 pr-2 font-semibold">#</th>
                         <th className="pb-3 pr-2 font-semibold">التاريخ</th>
-                        <th className="pb-3 pr-2 font-semibold">المورد</th>
+                        <th className="pb-3 pr-2 font-semibold">الجهة</th>
+                        <th className="pb-3 pr-2 font-semibold">نوع المصروف</th>
                         <th className="pb-3 pr-2 font-semibold">رقم التسعير</th>
-                        <th className="pb-3 pr-2 font-semibold">رقم الشراء</th>
                         <th className="pb-3 pr-2 font-semibold">المبلغ</th>
                         <th className="pb-3 pr-2 font-semibold">الضريبة</th>
                         <th className="pb-3 pr-2 font-semibold">الإجمالي</th>
@@ -228,8 +294,12 @@ export default function ReportsPage() {
                             {format(new Date(payment.paymentDate), "dd/MM/yyyy")}
                           </td>
                           <td className="py-3 pr-2">{payment.supplierName}</td>
+                          <td className="py-3 pr-2 text-tiny">
+                            {payment.paymentType === "expense" && payment.expenseCategory
+                              ? getExpenseCategoryName(payment.expenseCategory)
+                              : "-"}
+                          </td>
                           <td className="py-3 pr-2">{payment.quotationNumber || "-"}</td>
-                          <td className="py-3 pr-2">{payment.purchaseOrderNumber || "-"}</td>
                           <td className="py-3 pr-2 tabular-nums">
                             {formatCurrency(Number(payment.amount))}
                           </td>
