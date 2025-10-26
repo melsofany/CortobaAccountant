@@ -245,10 +245,10 @@ export default function PaymentForm() {
             رجوع
           </Button>
           <h1 className="text-h1 text-foreground mb-2">
-            {isEdit ? "تعديل الدفعة" : "إضافة دفعة جديدة"}
+            {isEdit ? "تعديل المصروف" : "إضافة مصروف جديد"}
           </h1>
           <p className="text-muted-foreground">
-            {isEdit ? "تحديث بيانات الدفعة" : "إضافة مصروف أو إيراد للنظام المحاسبي"}
+            {isEdit ? "تحديث بيانات المصروف" : "إضافة مصروف جديد للنظام المحاسبي"}
           </p>
         </div>
 
@@ -258,47 +258,27 @@ export default function PaymentForm() {
               <CardTitle className="text-h2">بيانات الدفعة</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Payment Type */}
+              {/* Expense Category */}
               <div className="space-y-2">
-                <Label htmlFor="paymentType">نوع العملية *</Label>
+                <Label htmlFor="expenseCategory">نوع المصروف *</Label>
                 <Select
-                  value={form.watch("paymentType") || "expense"}
-                  onValueChange={(value: "expense" | "income") => form.setValue("paymentType", value)}
-                  defaultValue="expense"
+                  value={form.watch("expenseCategory") || ""}
+                  onValueChange={(value: any) => form.setValue("expenseCategory", value)}
                 >
-                  <SelectTrigger id="paymentType" data-testid="select-payment-type">
-                    <SelectValue placeholder="مصروف" />
+                  <SelectTrigger id="expenseCategory" data-testid="select-expense-category">
+                    <SelectValue placeholder="اختر نوع المصروف" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="expense">مصروف</SelectItem>
-                    <SelectItem value="income">إضافة للخزينة</SelectItem>
+                    <SelectItem value="supplier">دفعة لمورد</SelectItem>
+                    <SelectItem value="transport">نقل</SelectItem>
+                    <SelectItem value="shipping">شحن</SelectItem>
+                    <SelectItem value="salaries">مرتبات</SelectItem>
+                    <SelectItem value="rent">إيجارات</SelectItem>
+                    <SelectItem value="office_supplies">مستلزمات المكتب</SelectItem>
+                    <SelectItem value="miscellaneous">مصروفات نثرية</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-
-              {/* Expense Category - Only for expenses */}
-              {form.watch("paymentType") === "expense" && (
-                <div className="space-y-2">
-                  <Label htmlFor="expenseCategory">نوع المصروف *</Label>
-                  <Select
-                    value={form.watch("expenseCategory") || ""}
-                    onValueChange={(value: any) => form.setValue("expenseCategory", value)}
-                  >
-                    <SelectTrigger id="expenseCategory" data-testid="select-expense-category">
-                      <SelectValue placeholder="اختر نوع المصروف" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="supplier">دفعة لمورد</SelectItem>
-                      <SelectItem value="transport">نقل</SelectItem>
-                      <SelectItem value="shipping">شحن</SelectItem>
-                      <SelectItem value="salaries">مرتبات</SelectItem>
-                      <SelectItem value="rent">إيجارات</SelectItem>
-                      <SelectItem value="office_supplies">مستلزمات المكتب</SelectItem>
-                      <SelectItem value="miscellaneous">مصروفات نثرية</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
 
               {/* Payment Method */}
               <div className="space-y-2">
@@ -323,8 +303,7 @@ export default function PaymentForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="supplierName">
-                    {form.watch("paymentType") === "income" ? "اسم الجهة" : 
-                     form.watch("expenseCategory") === "supplier" ? "اسم المورد" :
+                    {form.watch("expenseCategory") === "supplier" ? "اسم المورد" :
                      form.watch("expenseCategory") === "salaries" ? "اسم الموظف" :
                      "اسم الجهة/المورد"} *
                   </Label>
@@ -369,30 +348,28 @@ export default function PaymentForm() {
                 </div>
               </div>
 
-              {/* Row 2: Quotation Number and Purchase Order Number - Only for expenses */}
-              {form.watch("paymentType") === "expense" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="quotationNumber">رقم طلب التسعير</Label>
-                    <Input
-                      id="quotationNumber"
-                      {...form.register("quotationNumber")}
-                      placeholder="اختياري"
-                      data-testid="input-quotation-number"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="purchaseOrderNumber">رقم أمر الشراء</Label>
-                    <Input
-                      id="purchaseOrderNumber"
-                      {...form.register("purchaseOrderNumber")}
-                      placeholder="اختياري"
-                      data-testid="input-purchase-order-number"
-                    />
-                  </div>
+              {/* Row 2: Quotation Number and Purchase Order Number */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="quotationNumber">رقم طلب التسعير</Label>
+                  <Input
+                    id="quotationNumber"
+                    {...form.register("quotationNumber")}
+                    placeholder="اختياري"
+                    data-testid="input-quotation-number"
+                  />
                 </div>
-              )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="purchaseOrderNumber">رقم أمر الشراء</Label>
+                  <Input
+                    id="purchaseOrderNumber"
+                    {...form.register("purchaseOrderNumber")}
+                    placeholder="اختياري"
+                    data-testid="input-purchase-order-number"
+                  />
+                </div>
+              </div>
 
               {/* Row 3: Amount and VAT */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -473,7 +450,7 @@ export default function PaymentForm() {
           </Card>
 
           {/* Line Items Section - Only for supplier expenses */}
-          {form.watch("paymentType") === "expense" && form.watch("expenseCategory") === "supplier" && (
+          {form.watch("expenseCategory") === "supplier" && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-h2">بنود الدفعة</CardTitle>
