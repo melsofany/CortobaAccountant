@@ -80,51 +80,55 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="hover-elevate">
-            <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-              <CardTitle className="text-small font-medium text-muted-foreground">
-                إجمالي الإضافات
-              </CardTitle>
-              <TrendingUp className="h-5 w-5 text-chart-2" />
-            </CardHeader>
-            <CardContent>
-              {statsLoading ? (
-                <div className="h-8 w-32 bg-muted animate-pulse rounded" />
-              ) : (
-                <>
-                  <div className="text-h1 font-bold text-chart-2 tabular-nums" data-testid="text-total-income">
-                    {formatCurrency(stats?.totalIncome || 0)}
-                  </div>
-                  <p className="text-tiny text-muted-foreground mt-1">
-                    المبالغ الواردة
-                  </p>
-                </>
-              )}
-            </CardContent>
-          </Card>
+          <Link href="/income">
+            <Card className="hover-elevate cursor-pointer">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                <CardTitle className="text-small font-medium text-muted-foreground">
+                  إجمالي الوارد
+                </CardTitle>
+                <TrendingUp className="h-5 w-5 text-chart-2" />
+              </CardHeader>
+              <CardContent>
+                {statsLoading ? (
+                  <div className="h-8 w-32 bg-muted animate-pulse rounded" />
+                ) : (
+                  <>
+                    <div className="text-h1 font-bold text-chart-2 tabular-nums" data-testid="text-total-income">
+                      {formatCurrency(stats?.totalIncome || 0)}
+                    </div>
+                    <p className="text-tiny text-muted-foreground mt-1">
+                      عرض جميع الإضافات
+                    </p>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </Link>
 
-          <Card className="hover-elevate">
-            <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-              <CardTitle className="text-small font-medium text-muted-foreground">
-                إجمالي المصروفات
-              </CardTitle>
-              <TrendingDown className="h-5 w-5 text-destructive" />
-            </CardHeader>
-            <CardContent>
-              {statsLoading ? (
-                <div className="h-8 w-32 bg-muted animate-pulse rounded" />
-              ) : (
-                <>
-                  <div className="text-h1 font-bold text-destructive tabular-nums" data-testid="text-total-expenses">
-                    {formatCurrency(stats?.totalExpenses || 0)}
-                  </div>
-                  <p className="text-tiny text-muted-foreground mt-1">
-                    الدفعات للموردين
-                  </p>
-                </>
-              )}
-            </CardContent>
-          </Card>
+          <Link href="/expenses">
+            <Card className="hover-elevate cursor-pointer">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                <CardTitle className="text-small font-medium text-muted-foreground">
+                  إجمالي المصروفات
+                </CardTitle>
+                <TrendingDown className="h-5 w-5 text-destructive" />
+              </CardHeader>
+              <CardContent>
+                {statsLoading ? (
+                  <div className="h-8 w-32 bg-muted animate-pulse rounded" />
+                ) : (
+                  <>
+                    <div className="text-h1 font-bold text-destructive tabular-nums" data-testid="text-total-expenses">
+                      {formatCurrency(stats?.totalExpenses || 0)}
+                    </div>
+                    <p className="text-tiny text-muted-foreground mt-1">
+                      عرض جميع المصروفات
+                    </p>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </Link>
 
           <Card className="hover-elevate">
             <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
