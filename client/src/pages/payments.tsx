@@ -46,6 +46,7 @@ export default function PaymentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
   const [filterSettlement, setFilterSettlement] = useState<string>("all");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const { data: payments, isLoading } = useQuery<Payment[]>({
@@ -83,6 +84,19 @@ export default function PaymentsPage() {
     }).format(amount);
   };
 
+  const getExpenseCategoryName = (category: string | null) => {
+    const categories: Record<string, string> = {
+      supplier: "دفعة لمورد",
+      transport: "نقل",
+      shipping: "شحن",
+      salaries: "مرتبات",
+      rent: "إيجارات",
+      office_supplies: "مستلزمات المكتب",
+      miscellaneous: "مصروفات نثرية",
+    };
+    return category ? categories[category] || category : "غير محدد";
+  };
+
   const filteredPayments = payments?.filter((payment) => {
     const matchesSearch =
       payment.supplierName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -94,8 +108,9 @@ export default function PaymentsPage() {
       filterSettlement === "all" ||
       (filterSettlement === "settled" && payment.isSettled) ||
       (filterSettlement === "pending" && !payment.isSettled);
+    const matchesCategory = filterCategory === "all" || payment.expenseCategory === filterCategory;
 
-    return matchesSearch && matchesType && matchesSettlement;
+    return matchesSearch && matchesType && matchesSettlement && matchesCategory;
   });
 
   return (
@@ -126,8 +141,8 @@ export default function PaymentsPage() {
         {/* Filters */}
         <Card className="mb-6">
           <CardContent className="pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="relative">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              <div className="relative md:col-span-2">
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="بحث عن مورد أو رقم..."
@@ -149,6 +164,22 @@ export default function PaymentsPage() {
                 </SelectContent>
               </Select>
 
+              <Select value={filterCategory} onValueChange={setFilterCategory}>
+                <SelectTrigger data-testid="select-filter-category">
+                  <SelectValue placeholder="نوع المصروف" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">جميع الأنواع</SelectItem>
+                  <SelectItem value="supplier">دفعات للموردين</SelectItem>
+                  <SelectItem value="transport">نقل</SelectItem>
+                  <SelectItem value="shipping">شحن</SelectItem>
+                  <SelectItem value="salaries">مرتبات</SelectItem>
+                  <SelectItem value="rent">إيجارات</SelectItem>
+                  <SelectItem value="office_supplies">مستلزمات المكتب</SelectItem>
+                  <SelectItem value="miscellaneous">مصروفات نثرية</SelectItem>
+                </SelectContent>
+              </Select>
+
               <Select value={filterSettlement} onValueChange={setFilterSettlement}>
                 <SelectTrigger data-testid="select-filter-settlement">
                   <SelectValue placeholder="حالة التسوية" />
@@ -159,11 +190,6 @@ export default function PaymentsPage() {
                   <SelectItem value="pending">معلق</SelectItem>
                 </SelectContent>
               </Select>
-
-              <Button variant="outline" className="gap-2" data-testid="button-export">
-                <Download className="w-4 h-4" />
-                تصدير
-              </Button>
             </div>
           </CardContent>
         </Card>
@@ -188,9 +214,9 @@ export default function PaymentsPage() {
                   <thead>
                     <tr className="border-b text-right">
                       <th className="pb-3 pr-4 text-small font-medium text-muted-foreground">التاريخ</th>
-                      <th className="pb-3 pr-4 text-small font-medium text-muted-foreground">المورد</th>
+                      <th className="pb-3 pr-4 text-small font-medium text-muted-foreground">الجهة</th>
+                      <th className="pb-3 pr-4 text-small font-medium text-muted-foreground">نوع المصروف</th>
                       <th className="pb-3 pr-4 text-small font-medium text-muted-foreground">رقم التسعير</th>
-                      <th className="pb-3 pr-4 text-small font-medium text-muted-foreground">رقم الشراء</th>
                       <th className="pb-3 pr-4 text-small font-medium text-muted-foreground">المبلغ</th>
                       <th className="pb-3 pr-4 text-small font-medium text-muted-foreground">الضريبة</th>
                       <th className="pb-3 pr-4 text-small font-medium text-muted-foreground">الإجمالي</th>
@@ -221,15 +247,17 @@ export default function PaymentsPage() {
                           </div>
                         </td>
                         <td className="py-4 pr-4">
-                          {payment.quotationNumber ? (
-                            <span className="text-small">{payment.quotationNumber}</span>
+                          {payment.paymentType === "expense" && payment.expenseCategory ? (
+                            <Badge variant="outline" className="text-tiny">
+                              {getExpenseCategoryName(payment.expenseCategory)}
+                            </Badge>
                           ) : (
                             <span className="text-tiny text-muted-foreground">-</span>
                           )}
                         </td>
                         <td className="py-4 pr-4">
-                          {payment.purchaseOrderNumber ? (
-                            <span className="text-small">{payment.purchaseOrderNumber}</span>
+                          {payment.quotationNumber ? (
+                            <span className="text-small">{payment.quotationNumber}</span>
                           ) : (
                             <span className="text-tiny text-muted-foreground">-</span>
                           )}
