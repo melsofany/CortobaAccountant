@@ -248,7 +248,7 @@ export default function PaymentForm() {
             {isEdit ? "تعديل الدفعة" : "إضافة دفعة جديدة"}
           </h1>
           <p className="text-muted-foreground">
-            {isEdit ? "تحديث بيانات الدفعة" : "إضافة دفعة جديدة للموردين أو الخزينة"}
+            {isEdit ? "تحديث بيانات الدفعة" : "إضافة مصروف أو إيراد للنظام المحاسبي"}
           </p>
         </div>
 
