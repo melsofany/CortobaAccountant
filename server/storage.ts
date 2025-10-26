@@ -34,7 +34,8 @@ function rowToPayment(row: any[], rowIndex: number): Payment {
     settlementNotes: row[13] || null,
     paymentType: (row[14] || 'expense') as 'expense' | 'income',
     expenseCategory: row[15] || null,
-    createdAt: new Date(row[16] || new Date()),
+    paymentMethod: row[16] || null,
+    createdAt: new Date(row[17] || new Date()),
     updatedAt: new Date(),
   };
 }
@@ -57,6 +58,7 @@ function paymentToRow(payment: Payment): any[] {
     payment.settlementNotes || '',
     payment.paymentType,
     payment.expenseCategory || '',
+    payment.paymentMethod || '',
     payment.createdAt.toISOString(),
   ];
 }
@@ -137,6 +139,7 @@ export class GoogleSheetsStorage implements IStorage {
       settlementNotes: null,
       paymentType: insertPayment.paymentType || 'expense',
       expenseCategory: insertPayment.expenseCategory || null,
+      paymentMethod: insertPayment.paymentMethod || null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

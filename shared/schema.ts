@@ -21,6 +21,7 @@ export const payments = pgTable("payments", {
   settlementNotes: text("settlement_notes"),
   paymentType: text("payment_type").notNull().default("expense"), // expense or income
   expenseCategory: text("expense_category"), // supplier, transport, shipping, salaries, rent, office_supplies, miscellaneous
+  paymentMethod: text("payment_method"), // bank_transfer, cash, e_wallet, instapay
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -35,6 +36,7 @@ export const insertPaymentSchema = createInsertSchema(payments, {
   includesVAT: z.boolean().default(false),
   paymentType: z.enum(["expense", "income"]).default("expense"),
   expenseCategory: z.enum(["supplier", "transport", "shipping", "salaries", "rent", "office_supplies", "miscellaneous"]).optional(),
+  paymentMethod: z.enum(["bank_transfer", "cash", "e_wallet", "instapay"]).optional(),
 }).omit({
   id: true,
   createdAt: true,

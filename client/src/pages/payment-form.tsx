@@ -63,6 +63,7 @@ export default function PaymentForm() {
       purchaseOrderNumber: "",
       includesVAT: false,
       paymentType: "expense",
+      paymentMethod: undefined,
     },
   });
 
@@ -86,6 +87,7 @@ export default function PaymentForm() {
         purchaseOrderNumber: payment.purchaseOrderNumber || "",
         includesVAT: payment.includesVAT,
         paymentType: payment.paymentType,
+        paymentMethod: payment.paymentMethod || undefined,
       });
       setIncludesVAT(payment.includesVAT);
     }
@@ -245,6 +247,25 @@ export default function PaymentForm() {
                 </div>
               )}
 
+              {/* Payment Method */}
+              <div className="space-y-2">
+                <Label htmlFor="paymentMethod">طريقة الدفع *</Label>
+                <Select
+                  value={form.watch("paymentMethod") || ""}
+                  onValueChange={(value: any) => form.setValue("paymentMethod", value)}
+                >
+                  <SelectTrigger id="paymentMethod" data-testid="select-payment-method">
+                    <SelectValue placeholder="اختر طريقة الدفع" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cash">كاش</SelectItem>
+                    <SelectItem value="bank_transfer">تحويل بنكي</SelectItem>
+                    <SelectItem value="e_wallet">محفظة إلكترونية</SelectItem>
+                    <SelectItem value="instapay">إنستاباي</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* Row 1: Supplier Name and Payment Date */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -295,28 +316,30 @@ export default function PaymentForm() {
                 </div>
               </div>
 
-              {/* Row 2: Quotation Number and Purchase Order Number */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="quotationNumber">رقم طلب التسعير</Label>
-                  <Input
-                    id="quotationNumber"
-                    {...form.register("quotationNumber")}
-                    placeholder="اختياري"
-                    data-testid="input-quotation-number"
-                  />
-                </div>
+              {/* Row 2: Quotation Number and Purchase Order Number - Only for expenses */}
+              {form.watch("paymentType") === "expense" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="quotationNumber">رقم طلب التسعير</Label>
+                    <Input
+                      id="quotationNumber"
+                      {...form.register("quotationNumber")}
+                      placeholder="اختياري"
+                      data-testid="input-quotation-number"
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="purchaseOrderNumber">رقم أمر الشراء</Label>
-                  <Input
-                    id="purchaseOrderNumber"
-                    {...form.register("purchaseOrderNumber")}
-                    placeholder="اختياري"
-                    data-testid="input-purchase-order-number"
-                  />
+                  <div className="space-y-2">
+                    <Label htmlFor="purchaseOrderNumber">رقم أمر الشراء</Label>
+                    <Input
+                      id="purchaseOrderNumber"
+                      {...form.register("purchaseOrderNumber")}
+                      placeholder="اختياري"
+                      data-testid="input-purchase-order-number"
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Row 3: Amount and VAT */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
